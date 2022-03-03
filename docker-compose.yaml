@@ -1,0 +1,27 @@
+version: '1'
+#build image for this component before launching
+
+services:
+  music:
+    image: sample-microservices-project/music-service:0.0.1-SNAPSHOT
+    mem_reservation: 700m
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://database:5432/compose-postgres
+      - SPRING_DATASOURCE_USERNAME=compose-postgres
+      - SPRING_DATASOURCE_PASSWORD=compose-postgres
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+
+  database:
+    image: 'postgres:latest'
+    ports:
+      - "5432:5432"
+    container_name: database
+    environment:
+      - POSTGRES_USER=compose-postgres
+      - POSTGRES_PASSWORD=compose-postgres
+    volumes:
+      - ./data.sql:/docker-entrypoint-initdb.d/data.sql
