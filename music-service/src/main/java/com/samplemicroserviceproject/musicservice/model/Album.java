@@ -9,6 +9,7 @@ import javax.persistence.Id;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 @Entity
 public class Album {
 

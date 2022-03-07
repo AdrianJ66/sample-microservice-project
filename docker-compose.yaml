@@ -1,19 +1,56 @@
-version: '1'
-#build image for this component before launching
+version: '3'
 
 services:
   music:
-    image: sample-microservices-project/music-service:0.0.1-SNAPSHOT
+    image:  music-service-new
+    build: ./music-service/
     mem_reservation: 700m
     ports:
-      - "8080:8080"
+      - "8000:8000"
     depends_on:
       - database
+      - naming-server
+      - rabbitmq
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://database:5432/compose-postgres
       - SPRING_DATASOURCE_USERNAME=compose-postgres
       - SPRING_DATASOURCE_PASSWORD=compose-postgres
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://naming-server:8761/eureka
+      - SPRING.ZIPKIN.BASEURL=http://zipkin-server:9411/
+      - RABBIT_URI=amqp://guest:guest@rabbitmq:5672
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_ZIPKIN_SENDER_TYPE=rabbit
+    networks:
+      - radio-network
+       
+  radio:
+    image:  radio-service-new
+    build: ./radio-service/
+    mem_reservation: 700m
+    ports:
+      - "8100:8100"
+    networks:
+      - radio-network
+    depends_on:
+      - naming-server
+      - rabbitmq
+      - music
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-server:8761/eureka
+      SPRING.ZIPKIN.BASEURL: http://zipkin-server:9411/
+      RABBIT_URI: amqp://guest:guest@rabbitmq:5672
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_ZIPKIN_SENDER_TYPE: rabbit
+      
+  naming-server:
+    image: naming-server-new
+    build: ./naming-server/
+    mem_reservation: 700m
+    ports:
+      - "8761:8761"
+    networks:
+      - radio-network
 
   database:
     image: 'postgres:latest'
@@ -23,5 +60,31 @@ services:
     environment:
       - POSTGRES_USER=compose-postgres
       - POSTGRES_PASSWORD=compose-postgres
-    volumes:
-      - ./data.sql:/docker-entrypoint-initdb.d/data.sql
+    networks:
+      - radio-network
+
+  zipkin-server:
+    image: openzipkin/zipkin:2.23
+    mem_reservation: 300m
+    ports:
+      - "9411:9411"
+    networks:
+      - radio-network
+    depends_on:
+      - rabbitmq
+    environment:
+      RABBIT_URI: amqp://guest:guest@rabbitmq:5672
+    restart: always
+    
+  rabbitmq:
+    image: rabbitmq:3.8.12-management
+    mem_reservation: 300m
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - radio-network
+
+networks:
+  radio-network:
+

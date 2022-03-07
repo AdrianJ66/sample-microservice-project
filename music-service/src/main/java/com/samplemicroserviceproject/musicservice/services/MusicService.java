@@ -5,7 +5,8 @@ import com.samplemicroserviceproject.musicservice.model.Song;
 import com.samplemicroserviceproject.musicservice.repositories.AlbumRepository;
 import com.samplemicroserviceproject.musicservice.repositories.SongRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 public class MusicService {
@@ -21,6 +22,13 @@ public class MusicService {
 
     public Song getSong(Long id) {
         return songRepository.getById(id);
+    }
+
+    public Song getSongInfoByTitle(String song) {
+        Song foundSong = songRepository.findByTitle(song);
+        return foundSong != null ?
+                foundSong :
+                new Song(1L, "Your song could be here", new Album(2L, "Your shower hits", "You"));
     }
 
     public Album getAlbumForSong(Long songId) {

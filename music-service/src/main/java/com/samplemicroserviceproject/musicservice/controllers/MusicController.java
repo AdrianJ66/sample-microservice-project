@@ -20,9 +20,9 @@ public class MusicController {
         this.songToDtoConverter = songToDtoConverter;
     }
 
-    @GetMapping("/music-service/song/{id}")
-    public MusicDto getSongInfo(@PathVariable Long id) {
-        Song song = musicService.getSong(id);
+    @GetMapping("/music/song/{name}")
+    public MusicDto getSongInfo(@PathVariable String name) {
+        Song song = musicService.getSongInfoByTitle(name);
         return songToDtoConverter.convert(song);
     }
 }
