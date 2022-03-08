@@ -11,6 +11,8 @@ cd ../radio-service
 cd ../naming-server
 ./mvnw clean package -DskipTests
 
+cd ../api-gateway
+./mvnw clean package -DskipTests
 
 echo "Images prepared..."
 cd ..

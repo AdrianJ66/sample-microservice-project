@@ -52,6 +52,24 @@ services:
     networks:
       - radio-network
 
+  api-gateway:
+    image:  api-gateway-new
+    build: ./api-gateway/
+    mem_limit: 700m
+    ports:
+      - "8765:8765"
+    networks:
+      - radio-network
+    depends_on:
+      - naming-server
+      - rabbitmq
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-server:8761/eureka
+      SPRING.ZIPKIN.BASEURL: http://zipkin-server:9411/
+      RABBIT_URI: amqp://guest:guest@rabbitmq:5672
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_ZIPKIN_SENDER_TYPE: rabbit
+      
   database:
     image: 'postgres:latest'
     ports:
@@ -75,6 +93,24 @@ services:
     environment:
       RABBIT_URI: amqp://guest:guest@rabbitmq:5672
     restart: always
+
+  api-gateway:
+    image:  api-gateway-new
+    build: ./api-gateway/
+    mem_limit: 700m
+    ports:
+      - "8765:8765"
+    networks:
+      - radio-network
+    depends_on:
+      - naming-server
+      - rabbitmq
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-server:8761/eureka
+      SPRING.ZIPKIN.BASEURL: http://zipkin-server:9411/
+      RABBIT_URI: amqp://guest:guest@rabbitmq:5672
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_ZIPKIN_SENDER_TYPE: rabbit
     
   rabbitmq:
     image: rabbitmq:3.8.12-management
